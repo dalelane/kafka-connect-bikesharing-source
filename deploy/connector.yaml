@@ -1,0 +1,15 @@
+apiVersion: eventstreams.ibm.com/v1beta2
+kind: KafkaConnector
+metadata:
+  labels:
+    eventstreams.ibm.com/cluster: kafka-connect-cluster
+  name: bike-sharing
+  namespace: event-automation
+spec:
+  class: com.ibm.eventautomation.demos.bikesharing.DatagenSourceConnector
+  config:
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+  tasksMax: 1
