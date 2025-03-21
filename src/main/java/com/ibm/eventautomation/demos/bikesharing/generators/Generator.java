@@ -62,6 +62,9 @@ public abstract class Generator<T extends CachedDataItem> {
     protected T nextItem() throws NoSuchElementException {
         return cache.get();
     }
+    protected T peek() {
+        return cache.peek();
+    }
 
     protected void queue(SourceRecord record) {
         records.add(record);

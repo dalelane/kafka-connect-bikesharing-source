@@ -13,6 +13,8 @@
  */
 package com.ibm.eventautomation.demos.bikesharing.data;
 
+import java.time.LocalDateTime;
+
 public class WeatherReport extends CachedDataItem {
 
     private double temperature;
@@ -28,6 +30,15 @@ public class WeatherReport extends CachedDataItem {
         this.humidity = input.getHumidity().getRaw();
         this.windSpeed = input.getWindSpeed().getRaw();
         this.type = input.getWeather();
+    }
+
+    public WeatherReport(LocalDateTime newTimestamp, WeatherReport reportToClone) {
+        super(newTimestamp);
+        this.temperature = reportToClone.getTemperature();
+        this.feelsLikeTemperature = reportToClone.getFeelsLikeTemperature();
+        this.humidity = reportToClone.getHumidity();
+        this.windSpeed = reportToClone.getWindSpeed();
+        this.type = reportToClone.getType();
     }
 
     public double getTemperature() {

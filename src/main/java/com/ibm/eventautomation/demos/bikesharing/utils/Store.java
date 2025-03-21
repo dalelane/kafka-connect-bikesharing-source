@@ -63,4 +63,8 @@ public class Store<T extends CachedDataItem> {
         }
         return previous;
     }
+
+    public T peek() {
+        return items.peek();
+    }
 }
