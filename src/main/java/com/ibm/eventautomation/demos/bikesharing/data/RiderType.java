@@ -15,5 +15,8 @@ package com.ibm.eventautomation.demos.bikesharing.data;
 
 public enum RiderType {
     CASUAL,
-    REGISTERED;
+    REGISTERED,
+
+    // not a bike rider type - event type used in heartbeat events
+    HEARTBEAT;
 }

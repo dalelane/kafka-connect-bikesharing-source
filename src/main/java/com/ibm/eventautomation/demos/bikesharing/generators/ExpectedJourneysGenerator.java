@@ -72,12 +72,24 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
             TimeUnit.HOURS.toSeconds(1),
             TimeUnit.SECONDS
         );
+        scheduler.scheduleAtFixedRate(
+            heartbeatTask,
+            TimeCalculations.remainingSecondsInHour() + 1,
+            TimeUnit.HOURS.toSeconds(1),
+            TimeUnit.SECONDS
+        );
     }
 
     @Override
     protected ExpectedJourneys itemFactory(HourData raw) {
         return new ExpectedJourneys(raw);
     }
+
+    private final Runnable heartbeatTask = () -> {
+        ExpectedJourney heartbeat = new ExpectedJourney();
+        SourceRecord updateRecord = recordGenerator.generate(heartbeat, getTimestampFormatter());
+        queue(updateRecord);
+    };
 
     private final Runnable journeyTask = () -> {
         try {
@@ -122,7 +134,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         // START event
 
-        log.info("scheduling start of journey " + journeytype + " " + journeyidx + " : NOW + " + startSecs + " (" + (startSecs / 60) + " mins)");
+        log.debug("scheduling start of journey " + journeytype + " " + journeyidx + " : NOW + " + startSecs + " (" + (startSecs / 60) + " mins)");
         scheduler.schedule(() -> {
             journey.updateTime();
 
@@ -142,7 +154,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
                 break;
             }
 
-            log.info("scheduling next update of journey " + journeytype + " " + journeyidx + " : NOW + " + currentTime + " (" + (currentTime / 60) + " mins)");
+            log.debug("scheduling next update of journey " + journeytype + " " + journeyidx + " : NOW + " + currentTime + " (" + (currentTime / 60) + " mins)");
             scheduler.schedule(() -> {
                 journey.updateCurrentLocation();
 
@@ -154,7 +166,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         // END event
 
-        log.info("scheduling end of journey " + journeytype + " " + journeyidx + " : NOW + " + finishSecs + " (" + (finishSecs / 60) + " mins)");
+        log.debug("scheduling end of journey " + journeytype + " " + journeyidx + " : NOW + " + finishSecs + " (" + (finishSecs / 60) + " mins)");
         scheduler.schedule(() -> {
             journey.updateCurrentLocation();
 

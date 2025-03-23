@@ -36,6 +36,15 @@ public class ExpectedJourney extends CachedDataItem {
         this.update = journeysSet.getStart();
     }
 
+    public ExpectedJourney() {
+        super(LocalDateTime.now());
+        this.rider = RiderType.HEARTBEAT;
+        this.bikeId = "";
+        this.startingLocation = new Location(0, 0);
+        this.currentLocation = this.startingLocation;
+        this.update = LocalDateTime.now();
+    }
+
     public String getJourneyId() {
         return journeyId;
     }
