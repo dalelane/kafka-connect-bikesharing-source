@@ -14,9 +14,13 @@
 package com.ibm.eventautomation.demos.bikesharing.records;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Map;
+
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
+
 import com.ibm.eventautomation.demos.bikesharing.data.WeatherReport;
 
 public class WeatherForecastGenerator extends RecordGenerator<WeatherReport> {
@@ -62,6 +66,11 @@ public class WeatherForecastGenerator extends RecordGenerator<WeatherReport> {
     }
 
     @Override
+    public Map<String, String> sourcePartition() {
+        return Collections.singletonMap(SOURCE_PARTITION, "weather");
+    }
+
+    @Override
     public Struct value(WeatherReport data, DateTimeFormatter formatter) {
         Struct temperature = new Struct(TEMPERATURE_SCHEMA);
         temperature.put(TEMPERATURE_SCHEMA.field("reading"),   data.getTemperature());
@@ -84,10 +93,5 @@ public class WeatherForecastGenerator extends RecordGenerator<WeatherReport> {
     @Override
     public String topic(WeatherReport data) {
         return "BIKESHARING.WEATHER";
-    }
-
-    @Override
-    public Integer topicPartition(WeatherReport data) {
-        return null;
     }
 }

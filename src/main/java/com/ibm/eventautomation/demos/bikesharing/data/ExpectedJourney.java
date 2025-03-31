@@ -73,6 +73,10 @@ public class ExpectedJourney extends CachedDataItem {
         this.update = LocalDateTime.now();
     }
 
+    public void updateTime(LocalDateTime newtime) {
+        this.update = newtime;
+    }
+
     public LocalDateTime getUpdate() {
         return update;
     }

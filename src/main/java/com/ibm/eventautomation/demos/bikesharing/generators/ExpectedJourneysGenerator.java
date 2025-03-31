@@ -13,6 +13,7 @@
  */
 package com.ibm.eventautomation.demos.bikesharing.generators;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.apache.kafka.connect.source.SourceTaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +63,12 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
     private final JourneyRecordGenerator recordGenerator = new JourneyRecordGenerator();
     private final ScheduledExecutorService scheduler;
 
-    public ExpectedJourneysGenerator(AbstractConfig config, Queue<SourceRecord> connectRecords, ScheduledExecutorService scheduler) {
+    public ExpectedJourneysGenerator(SourceTaskContext context, AbstractConfig config, Queue<SourceRecord> connectRecords, ScheduledExecutorService scheduler) {
         super(config, connectRecords);
+        initialise(context, recordGenerator.sourcePartition());
+
         this.scheduler = scheduler;
 
-        journeyTask.run();
         scheduler.scheduleAtFixedRate(
             journeyTask,
             TimeCalculations.remainingSecondsInHour() + 1,
@@ -176,5 +179,37 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
             BikeManager.checkin(bikeId);
         }, finishSecs, TimeUnit.SECONDS);
+    }
+
+
+
+
+    // historical journey records (created the first time the Connector starts to
+    //  add events from the start of the year) are simpler than the live journeys
+    //  generated - represented by a single location event at 5 minutes past the hour
+
+    @Override
+    protected void processNextItem(ExpectedJourneys journeys) {
+        historicalJourneys(journeys, journeys.getCasual(), RiderType.CASUAL);
+        historicalJourneys(journeys, journeys.getRegistered(), RiderType.REGISTERED);
+    }
+
+    private void historicalJourneys(ExpectedJourneys journeys, int numJourneys, RiderType type) {
+        LocalDateTime journeyTime = journeys.getStart().withMinute(5);
+        for (int i = 0; i < numJourneys; i++) {
+            historicalJourney(journeys, journeyTime, type);
+        }
+    }
+
+    private void historicalJourney(ExpectedJourneys set, LocalDateTime journeyTime, RiderType journeytype) {
+        Location journeyStart = Generators.randomLocation();
+        String bikeId = BikeManager.checkout();
+        ExpectedJourney journey = new ExpectedJourney(set, bikeId, journeytype, journeyStart);
+        journey.updateTime(journeyTime);
+
+        SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
+        queue(updateRecord);
+
+        BikeManager.checkin(bikeId);
     }
 }

@@ -17,18 +17,24 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.apache.kafka.connect.source.SourceTaskContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibm.eventautomation.demos.bikesharing.DatagenSourceConfig;
 import com.ibm.eventautomation.demos.bikesharing.data.CachedDataItem;
 import com.ibm.eventautomation.demos.bikesharing.data.HourData;
 import com.ibm.eventautomation.demos.bikesharing.data.RawHourData;
 import com.ibm.eventautomation.demos.bikesharing.exceptions.BikeSharingDataException;
+import com.ibm.eventautomation.demos.bikesharing.utils.OffsetManagement;
 import com.ibm.eventautomation.demos.bikesharing.utils.Store;
 import com.opencsv.bean.CsvToBeanBuilder;
 
@@ -43,6 +49,8 @@ import com.opencsv.bean.CsvToBeanBuilder;
  */
 public abstract class Generator<T extends CachedDataItem> {
 
+    private static final Logger log = LoggerFactory.getLogger(Generator.class);
+
     private static final String DATA_SOURCE_FILE = "data/hour.csv";
 
     private final Store<T> cache;
@@ -56,6 +64,25 @@ public abstract class Generator<T extends CachedDataItem> {
         this.cache = getCachedData();
         this.records = connectRecords;
     }
+
+    /**
+     * If the Connector is running for the first time, this will generate a simplified history
+     *  of events from the start of the year up until the current time.
+     */
+    protected void initialise(SourceTaskContext context, Map<String, String> sourcePartition) {
+        log.debug("initialise");
+        boolean firstRun = OffsetManagement.hasStoredOffset(context, sourcePartition) == false;
+        log.debug("first run {}", firstRun);
+        if (firstRun) {
+            List<T> historicalData = cache.history();
+            log.debug("number of items to init {}", historicalData.size());
+            for (T historicalItem : historicalData) {
+                processNextItem(historicalItem);
+            }
+        }
+    }
+
+    protected abstract void processNextItem(T item);
 
     protected abstract T itemFactory(HourData raw);
 

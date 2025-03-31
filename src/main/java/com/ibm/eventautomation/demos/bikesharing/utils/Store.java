@@ -14,6 +14,7 @@
 package com.ibm.eventautomation.demos.bikesharing.utils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -62,6 +63,19 @@ public class Store<T extends CachedDataItem> {
             next = items.peek();
         }
         return previous;
+    }
+
+    public List<T> history() {
+        LocalDateTime now = LocalDateTime.now();
+        List<T> historyItems = new ArrayList<>();
+        T nextItem = items.peek();
+        while (nextItem.getStart().isBefore(now)) {
+            nextItem = items.remove();
+            historyItems.add(nextItem);
+
+            nextItem = items.peek();
+        }
+        return historyItems;
     }
 
     public T peek() {

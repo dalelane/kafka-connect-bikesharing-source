@@ -16,6 +16,7 @@ package com.ibm.eventautomation.demos.bikesharing.records;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
@@ -24,10 +25,15 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import com.ibm.eventautomation.demos.bikesharing.data.CachedDataItem;
 
+
 public abstract class RecordGenerator<T extends CachedDataItem> {
 
     public abstract String topic(T data);
-    public abstract Integer topicPartition(T data);
+
+    public Integer topicPartition(T data) {
+        return null;
+    }
+
 
     public ConnectHeaders headers(T data) {
         return new ConnectHeaders();
@@ -37,14 +43,22 @@ public abstract class RecordGenerator<T extends CachedDataItem> {
         return data.getStart().toEpochSecond(ZoneOffset.UTC) * 1000L;
     }
 
+    protected static final String SOURCE_PARTITION = "source";
+    public abstract Map<String, ?> sourcePartition();
+
+    public static final String SOURCE_OFFSET = "date";
+    public Map<String, Long> sourceOffset(T data) {
+        return Collections.singletonMap(SOURCE_OFFSET, data.getStart().toInstant(ZoneOffset.UTC).toEpochMilli());
+    }
+
     public abstract Schema keySchema();
     public abstract String key(T data);
     public abstract Schema valueSchema();
     public abstract Struct value(T data, DateTimeFormatter formatter);
 
     public SourceRecord generate(T data,  DateTimeFormatter formatter) {
-        return new SourceRecord(Collections.emptyMap(),
-                                Collections.emptyMap(),
+        return new SourceRecord(sourcePartition(),
+                                sourceOffset(data),
                                 topic(data), topicPartition(data),
                                 keySchema(), key(data),
                                 valueSchema(), value(data, formatter),

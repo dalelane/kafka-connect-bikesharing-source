@@ -57,8 +57,8 @@ public class DatagenSourceTask extends SourceTask {
 
         AbstractConfig config = new AbstractConfig(DatagenSourceConfig.CONFIG_DEF, props);
 
-        new WeatherReportGenerator(config, queue, scheduler);
-        new ExpectedJourneysGenerator(config, queue, scheduler);
+        new WeatherReportGenerator(context, config, queue, scheduler);
+        new ExpectedJourneysGenerator(context, config, queue, scheduler);
     }
 
 

@@ -2,6 +2,8 @@ package com.ibm.eventautomation.demos.bikesharing.records;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Map;
 
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -34,11 +36,6 @@ public class JourneyRecordGenerator extends RecordGenerator<ExpectedJourney> {
     }
 
     @Override
-    public Integer topicPartition(ExpectedJourney data) {
-        return null;
-    }
-
-    @Override
     public Schema keySchema() {
         return Schema.STRING_SCHEMA;
     }
@@ -56,6 +53,11 @@ public class JourneyRecordGenerator extends RecordGenerator<ExpectedJourney> {
     @Override
     public long getTimestamp(ExpectedJourney data) {
         return data.getUpdate().toEpochSecond(ZoneOffset.UTC) * 1000L;
+    }
+
+    @Override
+    public Map<String, String> sourcePartition() {
+        return Collections.singletonMap(SOURCE_PARTITION, "journey");
     }
 
     @Override

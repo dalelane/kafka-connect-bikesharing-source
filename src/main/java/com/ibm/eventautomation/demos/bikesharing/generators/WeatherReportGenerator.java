@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.apache.kafka.connect.source.SourceTaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +23,9 @@ public class WeatherReportGenerator extends Generator<WeatherReport> {
 
     private final WeatherForecastGenerator recordGenerator = new WeatherForecastGenerator();
 
-    public WeatherReportGenerator(AbstractConfig config, Queue<SourceRecord> connectRecords, ScheduledExecutorService scheduler) {
+    public WeatherReportGenerator(SourceTaskContext context, AbstractConfig config, Queue<SourceRecord> connectRecords, ScheduledExecutorService scheduler) {
         super(config, connectRecords);
-        weatherTask.run();
+        initialise(context, recordGenerator.sourcePartition());
 
         scheduler.scheduleAtFixedRate(
             weatherTask,
@@ -37,6 +38,12 @@ public class WeatherReportGenerator extends Generator<WeatherReport> {
     @Override
     protected WeatherReport itemFactory(HourData raw) {
         return new WeatherReport(raw);
+    }
+
+    @Override
+    protected void processNextItem(WeatherReport item) {
+        SourceRecord record = recordGenerator.generate(item, getTimestampFormatter());
+        queue(record);
     }
 
     private final Runnable weatherTask = () -> {
@@ -58,7 +65,6 @@ public class WeatherReportGenerator extends Generator<WeatherReport> {
         }
 
         log.info("Weather forecast " + weatherReport.toString());
-        SourceRecord weatherRecord = recordGenerator.generate(weatherReport, getTimestampFormatter());
-        queue(weatherRecord);
+        processNextItem(weatherReport);
     };
 }

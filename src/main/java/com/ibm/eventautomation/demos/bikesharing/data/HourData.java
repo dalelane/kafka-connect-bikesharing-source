@@ -124,12 +124,6 @@ public class HourData {
 
 
 
-
-
-
-
-
-
     private static final DateTimeFormatter DATE_STRING_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static LocalDateTime convertToDateTime(String dateStr, int year, int hour) {
         try {
