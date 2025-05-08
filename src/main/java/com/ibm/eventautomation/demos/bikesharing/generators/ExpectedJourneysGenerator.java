@@ -125,7 +125,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
 
     private void fakeJourney(ExpectedJourneys set, int startSecs, int finishSecs, int journeyidx, RiderType journeytype) {
-        log.info("preparing journey " + journeytype + " " + journeyidx);
+        log.debug("preparing journey " + journeytype + " " + journeyidx);
 
         // get a random start location for the journey
         Location journeyStart = Generators.randomLocation();
@@ -143,7 +143,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
         scheduler.schedule(() -> {
             journey.updateTime();
 
-            log.info("Journey " + journeyidx + " start " + journey.toString());
+            log.debug("Journey " + journeyidx + " start " + journey.toString());
             SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
             queue(updateRecord);
         }, startSecs, TimeUnit.SECONDS);
@@ -163,7 +163,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
             scheduler.schedule(() -> {
                 journey.updateCurrentLocation();
 
-                log.info("Journey " + journeyidx + " update " + journey.toString());
+                log.debug("Journey " + journeyidx + " update " + journey.toString());
                 SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
                 queue(updateRecord);
             }, currentTime, TimeUnit.SECONDS);
@@ -175,7 +175,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
         scheduler.schedule(() -> {
             journey.updateCurrentLocation();
 
-            log.info("Journey " + journeyidx + " complete " + journey.toString());
+            log.debug("Journey " + journeyidx + " complete " + journey.toString());
             SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
             queue(updateRecord);
 

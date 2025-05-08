@@ -64,7 +64,7 @@ public class WeatherReportGenerator extends Generator<WeatherReport> {
             }
         }
 
-        log.info("Weather forecast " + weatherReport.toString());
+        log.debug("Weather forecast " + weatherReport.toString());
         processNextItem(weatherReport);
     };
 }
