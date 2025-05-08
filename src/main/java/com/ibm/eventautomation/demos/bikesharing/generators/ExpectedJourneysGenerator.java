@@ -129,11 +129,13 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         // get a random start location for the journey
         Location journeyStart = Generators.randomLocation();
+        // get a random starting battery charge level for the bike at the start of the journey
+        int batteryStart = Generators.randomInt(80, 100);
         // get a bike that will be used for this journey
         String bikeId = BikeManager.checkout();
 
         // create a journey to emit events about
-        ExpectedJourney journey = new ExpectedJourney(set, bikeId, journeytype, journeyStart);
+        ExpectedJourney journey = new ExpectedJourney(set, bikeId, journeytype, journeyStart, batteryStart);
 
         // START event
 
@@ -203,8 +205,9 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
     private void historicalJourney(ExpectedJourneys set, LocalDateTime journeyTime, RiderType journeytype) {
         Location journeyStart = Generators.randomLocation();
+        int batteryStart = Generators.randomInt(80, 100);
         String bikeId = BikeManager.checkout();
-        ExpectedJourney journey = new ExpectedJourney(set, bikeId, journeytype, journeyStart);
+        ExpectedJourney journey = new ExpectedJourney(set, bikeId, journeytype, journeyStart, batteryStart);
         journey.updateTime(journeyTime);
 
         SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());

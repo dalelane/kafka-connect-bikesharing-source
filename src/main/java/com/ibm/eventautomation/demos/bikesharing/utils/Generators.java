@@ -68,4 +68,24 @@ public class Generators {
         return new Location(startingLocation.getLatitude() + randomDouble(-0.003, 0.003),
                             startingLocation.getLongitude() + randomDouble(-0.006, 0.006));
     }
+
+    /** Returns a random battery level that is a little lower than the provided level. */
+    public static Integer randomBatteryLevel(Integer startingBatteryLevel) {
+        // simulating a small battery drain (between 1 and 6 percent)
+        //  that will be reported between location updates for an e-bike that is
+        //  currently on the move
+        final int SMALLEST_BATTERY_DRAIN = 1;
+        final int HIGHEST_BATTERY_DRAIN = 6;
+
+        // want to avoid reporting a completely flat battery, so we will stop
+        //  reducing the battery once it is at 8%
+        final int LOWEST_BATTERY_LIMIT = 8;
+
+        final int batteryDrain = Generators.randomInt(
+            Math.min(SMALLEST_BATTERY_DRAIN, startingBatteryLevel - LOWEST_BATTERY_LIMIT),
+            Math.min(HIGHEST_BATTERY_DRAIN,  startingBatteryLevel - LOWEST_BATTERY_LIMIT + 1)
+        );
+
+        return startingBatteryLevel - batteryDrain;
+    }
 }

@@ -25,14 +25,16 @@ public class ExpectedJourney extends CachedDataItem {
     private final String bikeId;
     private final Location startingLocation;
     private Location currentLocation;
+    private int currentBatteryLevel;
     private LocalDateTime update;
 
-    public ExpectedJourney(ExpectedJourneys journeysSet, String bikeId, RiderType rider, Location startingLocation) {
+    public ExpectedJourney(ExpectedJourneys journeysSet, String bikeId, RiderType rider, Location startingLocation, int startingBatteryLevel) {
         super(journeysSet.getStart());
         this.bikeId = bikeId;
         this.rider = rider;
         this.startingLocation = startingLocation;
         this.currentLocation = new Location(startingLocation);
+        this.currentBatteryLevel = startingBatteryLevel;
         this.update = journeysSet.getStart();
     }
 
@@ -66,7 +68,13 @@ public class ExpectedJourney extends CachedDataItem {
     }
     public void updateCurrentLocation() {
         this.currentLocation = Generators.randomLocation(currentLocation);
+        this.currentBatteryLevel = Generators.randomBatteryLevel(currentBatteryLevel);
+
         updateTime();
+    }
+
+    public Integer getBattery() {
+        return currentBatteryLevel;
     }
 
     public void updateTime() {
@@ -87,6 +95,7 @@ public class ExpectedJourney extends CachedDataItem {
             ", time=" + update.toString() +
             ", bike=" + bikeId +
             ", rider=" + rider +
+            ", battery=" + currentBatteryLevel +
             ", startingLocation=" + startingLocation +
             ", currentLocation=" + currentLocation +
             "]";

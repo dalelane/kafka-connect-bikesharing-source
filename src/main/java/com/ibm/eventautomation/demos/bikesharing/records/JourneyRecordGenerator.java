@@ -27,6 +27,7 @@ public class JourneyRecordGenerator extends RecordGenerator<ExpectedJourney> {
             .field("bikeid",    Schema.STRING_SCHEMA)
             .field("usertype",  Schema.STRING_SCHEMA)
             .field("location",  LOCATION_SCHEMA)
+            .field("battery",   Schema.INT16_SCHEMA)
             .field("time",      Schema.STRING_SCHEMA)
         .build();
 
@@ -71,6 +72,7 @@ public class JourneyRecordGenerator extends RecordGenerator<ExpectedJourney> {
         value.put(SCHEMA.field("bikeid"),    data.getBikeId());
         value.put(SCHEMA.field("usertype"),  data.getRider().toString());
         value.put(SCHEMA.field("location"),  location);
+        value.put(SCHEMA.field("battery"),   data.getBattery().shortValue());
         value.put(SCHEMA.field("time"),      formatter.format(data.getUpdate()));
 
         return value;
