@@ -14,11 +14,15 @@
 package com.ibm.eventautomation.demos.bikesharing.utils;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibm.eventautomation.demos.bikesharing.data.CachedDataItem;
 
@@ -27,15 +31,20 @@ import com.ibm.eventautomation.demos.bikesharing.data.CachedDataItem;
  */
 public class Store<T extends CachedDataItem> {
 
+    private final Logger log = LoggerFactory.getLogger(Store.class);
+
     private final Queue<T> items;
+    private final int yearOffset;
 
     /**
      * Holds a sorted collection of items (sorted by timestamp)
      *
      * @param items - data items, sorted by start timestamp
      */
-    public Store(List<T> items) {
+    public Store(List<T> items, int yearsOffset) {
+        log.debug("creating store");
         this.items = new LinkedList<>(items);
+        this.yearOffset = yearsOffset;
     }
 
     /**
@@ -49,7 +58,7 @@ public class Store<T extends CachedDataItem> {
      *  to be returned yet
      */
     public T get() throws NoSuchElementException {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().minus(yearOffset, ChronoUnit.YEARS);
         if (items.isEmpty()) {
             throw new NoSuchElementException("No items left in the store");
         }
@@ -66,7 +75,8 @@ public class Store<T extends CachedDataItem> {
     }
 
     public List<T> history() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().minus(yearOffset, ChronoUnit.YEARS);
+        log.debug("extracting events before {} from the store (years offset {})", now, yearOffset);
         List<T> historyItems = new ArrayList<>();
         T nextItem = items.peek();
         while (nextItem.getStart().isBefore(now)) {

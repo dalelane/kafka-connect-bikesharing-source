@@ -8,7 +8,7 @@
     <groupId>com.ibm.eventautomation.demos</groupId>
     <artifactId>kafka-connect-bikesharing-source</artifactId>
     <description>Kafka Connect source connector used for generating simulated events for demos and tests</description>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-api</artifactId>
-            <version>3.9.0</version>
+            <version>3.9.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.10</version>
+            <version>5.11.2</version>
         </dependency>
     </dependencies>
 

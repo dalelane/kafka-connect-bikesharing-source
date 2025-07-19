@@ -25,15 +25,23 @@ public class DatagenSourceConfig {
 
     private static final String CONFIG_GROUP = "Config";
     public static final String CONFIG_FORMATS_TIMESTAMPS = "formats.timestamps";
-
+    public static final String CONFIG_DATE_SHIFT = "timestamps.shift";
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
+        .define(CONFIG_DATE_SHIFT,
+                Type.BOOLEAN,
+                false,
+                Importance.LOW,
+                "The source for data from this connector is a dataset of bike journeys in 2011 - 2012. " +
+                    "If true, the timestamps for events from the connector will be timeshifted to the current year. " +
+                    "If false, the year from the dataset will be used as-is.",
+                CONFIG_GROUP, 1, Width.LONG, "Timestamps shift")
         .define(CONFIG_FORMATS_TIMESTAMPS,
                 Type.STRING,
                 "yyyy-MM-dd HH:mm:ss.SSS",
                 new NonEmptyString(),
                 Importance.LOW,
                 "Format to use for timestamps generated for events.",
-                CONFIG_GROUP, 1, Width.LONG, "Timestamp format");
+                CONFIG_GROUP, 2, Width.LONG, "Timestamp format");
 
 }

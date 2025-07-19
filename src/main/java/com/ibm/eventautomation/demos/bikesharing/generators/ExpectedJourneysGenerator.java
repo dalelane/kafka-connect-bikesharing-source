@@ -69,15 +69,17 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         this.scheduler = scheduler;
 
+        int initialDelay = TimeCalculations.remainingSecondsInHour() + 1;
+
         scheduler.scheduleAtFixedRate(
             journeyTask,
-            TimeCalculations.remainingSecondsInHour() + 1,
+            initialDelay,
             TimeUnit.HOURS.toSeconds(1),
             TimeUnit.SECONDS
         );
         scheduler.scheduleAtFixedRate(
             heartbeatTask,
-            TimeCalculations.remainingSecondsInHour() + 1,
+            initialDelay,
             TimeUnit.HOURS.toSeconds(1),
             TimeUnit.SECONDS
         );
@@ -89,7 +91,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
     }
 
     private final Runnable heartbeatTask = () -> {
-        ExpectedJourney heartbeat = new ExpectedJourney();
+        ExpectedJourney heartbeat = new ExpectedJourney(nowYearsOffset);
         SourceRecord updateRecord = recordGenerator.generate(heartbeat, getTimestampFormatter());
         queue(updateRecord);
     };
@@ -141,7 +143,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         log.debug("scheduling start of journey " + journeytype + " " + journeyidx + " : NOW + " + startSecs + " (" + (startSecs / 60) + " mins)");
         scheduler.schedule(() -> {
-            journey.updateTime();
+            journey.updateTime(nowYearsOffset);
 
             log.debug("Journey " + journeyidx + " start " + journey.toString());
             SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
@@ -161,7 +163,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
             log.debug("scheduling next update of journey " + journeytype + " " + journeyidx + " : NOW + " + currentTime + " (" + (currentTime / 60) + " mins)");
             scheduler.schedule(() -> {
-                journey.updateCurrentLocation();
+                journey.updateCurrentLocation(nowYearsOffset);
 
                 log.debug("Journey " + journeyidx + " update " + journey.toString());
                 SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());
@@ -173,7 +175,7 @@ public class ExpectedJourneysGenerator extends Generator<ExpectedJourneys> {
 
         log.debug("scheduling end of journey " + journeytype + " " + journeyidx + " : NOW + " + finishSecs + " (" + (finishSecs / 60) + " mins)");
         scheduler.schedule(() -> {
-            journey.updateCurrentLocation();
+            journey.updateCurrentLocation(nowYearsOffset);
 
             log.debug("Journey " + journeyidx + " complete " + journey.toString());
             SourceRecord updateRecord = recordGenerator.generate(journey, getTimestampFormatter());

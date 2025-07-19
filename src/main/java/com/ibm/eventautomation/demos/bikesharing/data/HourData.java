@@ -15,7 +15,6 @@ package com.ibm.eventautomation.demos.bikesharing.data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -47,12 +46,12 @@ public class HourData {
     private int casualUsers;
     private int registeredUsers;
 
-    private static final int CURRENT_YEAR = Year.now().getValue();
+    private static final int DATASET_YEAR = 2011;
 
-    public HourData(RawHourData csvData) throws BikeSharingDataException {
+    public HourData(RawHourData csvData, int yearOffset) throws BikeSharingDataException {
         this.recordIndex = csvData.getInstant();
         this.start = convertToDateTime(csvData.getDteday(),
-                                       CURRENT_YEAR + csvData.getYr(),
+                                       csvData.getYr() + DATASET_YEAR + yearOffset,
                                        csvData.getHr());
         this.season = Season.valueOfCode(csvData.getSeason());
         this.holiday = csvData.getHoliday() == 1;

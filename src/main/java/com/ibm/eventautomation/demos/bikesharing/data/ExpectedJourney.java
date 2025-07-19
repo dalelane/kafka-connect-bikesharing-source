@@ -14,6 +14,7 @@
 package com.ibm.eventautomation.demos.bikesharing.data;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import com.ibm.eventautomation.demos.bikesharing.utils.Generators;
@@ -38,13 +39,13 @@ public class ExpectedJourney extends CachedDataItem {
         this.update = journeysSet.getStart();
     }
 
-    public ExpectedJourney() {
-        super(LocalDateTime.now());
+    public ExpectedJourney(int yearsOffset) {
+        super(LocalDateTime.now().minus(yearsOffset, ChronoUnit.YEARS));
         this.rider = RiderType.HEARTBEAT;
         this.bikeId = "";
         this.startingLocation = new Location(0, 0);
         this.currentLocation = this.startingLocation;
-        this.update = LocalDateTime.now();
+        this.update = LocalDateTime.now().minus(yearsOffset, ChronoUnit.YEARS);
     }
 
     public String getJourneyId() {
@@ -66,19 +67,19 @@ public class ExpectedJourney extends CachedDataItem {
     public Location getCurrentLocation() {
         return currentLocation;
     }
-    public void updateCurrentLocation() {
+    public void updateCurrentLocation(int yearsOffset) {
         this.currentLocation = Generators.randomLocation(currentLocation);
         this.currentBatteryLevel = Generators.randomBatteryLevel(currentBatteryLevel);
 
-        updateTime();
+        updateTime(yearsOffset);
     }
 
     public Integer getBattery() {
         return currentBatteryLevel;
     }
 
-    public void updateTime() {
-        this.update = LocalDateTime.now();
+    public void updateTime(int yearsOffset) {
+        this.update = LocalDateTime.now().minus(yearsOffset, ChronoUnit.YEARS);
     }
 
     public void updateTime(LocalDateTime newtime) {

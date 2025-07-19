@@ -1,6 +1,7 @@
 package com.ibm.eventautomation.demos.bikesharing.generators;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -59,7 +60,8 @@ public class WeatherReportGenerator extends Generator<WeatherReport> {
             }
             else {
                 log.debug("Record for this hour is missing - (re)use the record for the next hour to fill the gap");
-                LocalDateTime topOfHour = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+                LocalDateTime topOfHour = LocalDateTime.now().minus(nowYearsOffset, ChronoUnit.YEARS)
+                    .withMinute(0).withSecond(0).withNano(0);
                 weatherReport = new WeatherReport(topOfHour, weatherReport);
             }
         }

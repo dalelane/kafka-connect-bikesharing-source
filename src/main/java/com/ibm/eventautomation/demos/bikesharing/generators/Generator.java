@@ -16,6 +16,7 @@ package com.ibm.eventautomation.demos.bikesharing.generators;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +60,26 @@ public abstract class Generator<T extends CachedDataItem> {
     /** formatter for event timestamps */
     private final DateTimeFormatter timestampFormatter;
 
+    /** years to deduct from timestamps that are generated */
+    protected final int datasetYearsOffset;
+    /** years to deduct from current time used for comparisons */
+    protected final int nowYearsOffset;
+
+    private final static int DATASET_YEAR_START = 2011;
+
     protected Generator(AbstractConfig config, Queue<SourceRecord> connectRecords) throws BikeSharingDataException {
         timestampFormatter = DateTimeFormatter.ofPattern(config.getString(DatagenSourceConfig.CONFIG_FORMATS_TIMESTAMPS));
+        datasetYearsOffset = config.getBoolean(DatagenSourceConfig.CONFIG_DATE_SHIFT) ?
+                                // update timestamps to look like live data
+                                Year.now().getValue() - DATASET_YEAR_START :
+                                // use the dataset data as-is
+                                0;
+        nowYearsOffset = config.getBoolean(DatagenSourceConfig.CONFIG_DATE_SHIFT) ?
+                            // treating data as live / real-time
+                            0 :
+                            // shift timestamps to match dataset
+                            Year.now().getValue() - DATASET_YEAR_START;
+
         this.cache = getCachedData();
         this.records = connectRecords;
     }
@@ -106,9 +125,10 @@ public abstract class Generator<T extends CachedDataItem> {
             return new Store<>(new CsvToBeanBuilder<RawHourData>(reader)
                                     .withType(RawHourData.class)
                                     .build().parse().stream()
-                                    .map(raw -> new HourData(raw))
+                                    .map(raw -> new HourData(raw, datasetYearsOffset))
                                     .map(all -> itemFactory(all))
-                                    .collect(Collectors.toList()));
+                                    .collect(Collectors.toList()),
+                               nowYearsOffset);
         }
         catch (IOException exc) {
             throw new BikeSharingDataException(exc);
